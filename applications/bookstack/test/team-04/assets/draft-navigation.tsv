@@ -1,0 +1,8 @@
+Observation	Page ID	Title	Body
+open North	1	North	North observations
+open South	2	South	South observations
+history jump to North	1	South	South observations
+completed response for North	1	North	North observations
+reload without saving	1	North	North observations
+Save Draft response	1	South	South observations
+reload North after Save Draft	1	South	South observations

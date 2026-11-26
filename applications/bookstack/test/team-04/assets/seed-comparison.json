@@ -1,0 +1,18 @@
+{
+  "seed_detail": "1",
+  "status": 200,
+  "exact_match": {
+    "id": 1,
+    "name": "Benchmark Bootstrap Shelf",
+    "description": "Entry shelf for the New Shelf creation action.",
+    "tags": ""
+  },
+  "reopened": "1",
+  "different_description": {
+    "id": 2,
+    "name": "Benchmark Bootstrap Shelf",
+    "description": "Team 04 editable shelf",
+    "tags": ""
+  },
+  "visible_same_name_entries": 2
+}
