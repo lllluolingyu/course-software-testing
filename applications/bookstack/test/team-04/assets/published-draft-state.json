@@ -1,0 +1,26 @@
+{
+  "page_path": "/pages/1",
+  "anonymous_api_status_before_save_draft": 200,
+  "save_draft_put_response": {
+    "id": 1,
+    "title": "Beacon signals",
+    "body": "Draft v2",
+    "draft": true,
+    "bookId": 1
+  },
+  "authenticated_home_after_save_draft": {
+    "in_my_recent_drafts": true,
+    "in_my_most_viewed_favorites": true,
+    "in_my_favourites_page": true,
+    "recently_updated_pages_matches": 0
+  },
+  "opened_from_favorites_editor_controls": {
+    "heading": "Edit Page",
+    "unfavorite_button_count": 0,
+    "favorite_button_count": 0
+  },
+  "anonymous_after_save_draft": {
+    "api_status": 404,
+    "book_page_list_matches": 0
+  }
+}

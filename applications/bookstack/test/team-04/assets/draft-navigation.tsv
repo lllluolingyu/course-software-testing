@@ -1,8 +1,8 @@
-Observation	Page ID	Title	Body
-open North	1	North	North observations
-open South	2	South	South observations
-history jump to North	1	South	South observations
-completed response for North	1	North	North observations
-reload without saving	1	North	North observations
-Save Draft response	1	South	South observations
-reload North after Save Draft	1	South	South observations
+Step	URL Page ID	Source	Title	Body
+open North	1	editor fields	North	North observations
+open South	2	editor fields	South	South observations
+history jump to North	1	editor fields	South	South observations
+GET /api/pages/1 completed	1	network JSON	North	North observations
+reload North without saving	1	editor fields	North	North observations
+PUT /api/pages/1 on Save Draft	1	network JSON	South	South observations
+reload North after Save Draft	1	editor fields	South	South observations

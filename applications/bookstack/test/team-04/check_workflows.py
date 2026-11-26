@@ -1,4 +1,4 @@
-"""Browser regression tests for favorite ranking, draft identity and shelf creation."""
+"""Browser regression tests for Team 04 white-box BookStack workflows."""
 
 import os
 import re
@@ -81,8 +81,8 @@ class Team04Workflows(unittest.TestCase):
         cls.addClassCleanup(cls.browser.close)
 
     def setUp(self):
-        url = self.enterContext(fresh_app())
-        context = self.browser.new_context(base_url=url, viewport={"width": 1440, "height": 900})
+        self.base_url = self.enterContext(fresh_app())
+        context = self.browser.new_context(base_url=self.base_url, viewport={"width": 1440, "height": 900})
         self.addCleanup(context.close)
         self.page = context.new_page()
 
@@ -174,6 +174,127 @@ class Team04Workflows(unittest.TestCase):
             expect(shelf_list).to_be_visible()
         self.assertIn(seed_url, targets)
         self.assertEqual(len(targets), 2, f"Successful save left these distinct shelf URLs: {targets}")
+
+    def test_draft_edit_preserves_published_page_and_unfavorite(self):
+        page = self.page
+        login(page)
+        create_book(page, "Navigation manual")
+        control(page, "button", "New Page").click()
+        control(page, "textbox", "Page title").fill("Beacon signals")
+        control(page, "textbox", "Write your page content here...").fill("Published v1")
+        control(page, "button", "Save Page").click()
+        entry(control(page, "region", "Page list"), "Beacon signals").click()
+        expect(control(page, "heading", "Beacon signals")).to_be_visible()
+        page_path = "/" + page.url.split("/", 3)[-1]
+
+        control(page, "button", "Favorite").click()
+        expect(control(page, "button", "Unfavorite")).to_have_attribute("aria-pressed", "true")
+        control(page, "button", "Edit").click()
+        expect(control(page, "textbox", "Page title")).to_have_value("Beacon signals")
+        if control(page, "button", "Save Draft").count() == 0:
+            self.skipTest("Editor does not expose Save Draft when editing an already-published page.")
+        control(page, "textbox", "Write your page content here...").fill("Draft v2")
+        with page.expect_response(lambda r: r.url.endswith(page_path) and r.request.method == "PUT") as put_resp:
+            control(page, "button", "Save Draft").click()
+        self.assertTrue(put_resp.value.ok)
+
+        page.goto("/")
+        favorites_panel = control(page, "region", "My Most Viewed Favorites")
+        updated_panel = control(page, "region", "Recently Updated Pages")
+        expect(favorites_panel).to_be_visible()
+        expect(updated_panel).to_be_visible()
+        in_updated = entry(updated_panel, "Beacon signals").count() > 0
+
+        unfavorite_available = True
+        if entry(favorites_panel, "Beacon signals").count() > 0:
+            entry(favorites_panel, "Beacon signals").click()
+            expect(
+                control(page, "heading", "Beacon signals").or_(control(page, "heading", "Edit Page"))
+            ).to_be_visible()
+            unfavorite_available = control(page, "button", "Unfavorite").count() > 0
+
+        anon_ctx = self.browser.new_context(base_url=self.base_url, viewport={"width": 1440, "height": 900})
+        self.addCleanup(anon_ctx.close)
+        anon_page = anon_ctx.new_page()
+        anon_page.goto(page_path)
+        expect(
+            control(anon_page, "heading", "Beacon signals").or_(control(anon_page, "heading", "Page not found"))
+        ).to_be_visible()
+        public_readable = control(anon_page, "heading", "Beacon signals").count() > 0
+
+        self.assertTrue(
+            public_readable and in_updated and unfavorite_available,
+            f"After Save Draft on published page: public_readable={public_readable}, "
+            f"in_recently_updated={in_updated}, unfavorite_available_from_favorites={unfavorite_available}.",
+        )
+
+    def test_bootstrap_shelf_remains_immutable(self):
+        page = self.page
+        page.goto("/")
+        control(page, "link", "Shelves").click()
+        entry(control(page, "region", "Shelf list"), "Benchmark Bootstrap Shelf").click()
+        expect(control(page, "heading", "Benchmark Bootstrap Shelf")).to_be_visible()
+        self.assertEqual(control(page, "button", "Edit").count(), 0)
+        self.assertEqual(control(page, "button", "Delete").count(), 0)
+
+        create_btn = entry(page, "Create New Book")
+        if create_btn.count() == 0:
+            return
+        create_btn.click()
+        control(page, "textbox", "Name").fill("Intruder volume")
+        control(page, "textbox", "Description").fill("Added directly to bootstrap shelf")
+        with page.expect_response(
+            lambda r: "/api/" in r.url and r.request.method == "POST"
+        ) as save:
+            control(page, "button", "Save Book").click()
+        if save.value.status in (400, 403, 409, 422):
+            control(page, "link", "Shelves").click()
+            entry(control(page, "region", "Shelf list"), "Benchmark Bootstrap Shelf").click()
+            self.assertEqual(entry(control(page, "region", "Book list"), "Intruder volume").count(), 0)
+            return
+
+        expect(control(page, "heading", "Intruder volume")).to_be_visible()
+        entry(page, "Benchmark Bootstrap Shelf").click()
+        page.reload()
+        expect(control(page, "heading", "Benchmark Bootstrap Shelf")).to_be_visible()
+        count = entry(control(page, "region", "Book list"), "Intruder volume").count()
+        self.assertEqual(
+            count,
+            0,
+            f"Immutable bootstrap shelf now lists {count} user-created book(s) while Edit/Delete remain hidden.",
+        )
+
+    def test_anonymous_page_publish_matches_authenticated_creation(self):
+        page = self.page
+
+        def publish_twice(book_name):
+            create_book(page, book_name)
+            ids = []
+            for _ in range(2):
+                control(page, "button", "New Page").click()
+                control(page, "textbox", "Page title").fill("Shift report")
+                control(page, "textbox", "Write your page content here...").fill("All clear.")
+                with page.expect_response(
+                    lambda r: r.url.endswith("/pages") and r.request.method == "POST"
+                ) as resp:
+                    control(page, "button", "Save Page").click()
+                if resp.value.status in (400, 409, 422):
+                    self.skipTest(f"Server declined duplicate page creation (HTTP {resp.value.status}).")
+                self.assertTrue(resp.value.ok, f"Unexpected Save Page response: HTTP {resp.value.status}")
+                ids.append(resp.value.json()["id"])
+                expect(entry(control(page, "region", "Page list"), "Shift report").first).to_be_visible()
+            return entry(control(page, "region", "Page list"), "Shift report").count(), ids
+
+        page.goto("/")
+        anon_count, anon_ids = publish_twice("Anonymous log")
+        login(page)
+        auth_count, auth_ids = publish_twice("Signed-in log")
+        self.assertEqual(
+            (anon_count, len(set(anon_ids))),
+            (2, 2),
+            f"Logged-out Save Page produced {anon_count} entry/entries (IDs {anon_ids}), "
+            f"whereas signed-in Save Page produced {auth_count} entries (IDs {auth_ids}).",
+        )
 
 
 if __name__ == "__main__":

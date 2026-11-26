@@ -1,0 +1,26 @@
+{
+  "anonymous": {
+    "book": "Anonymous log",
+    "first_save": {
+      "status": 200,
+      "id": 1
+    },
+    "second_save": {
+      "status": 200,
+      "id": 1
+    },
+    "visible_page_list_entries": 1
+  },
+  "authenticated": {
+    "book": "Signed-in log",
+    "first_save": {
+      "status": 200,
+      "id": 2
+    },
+    "second_save": {
+      "status": 200,
+      "id": 3
+    },
+    "visible_page_list_entries": 2
+  }
+}
