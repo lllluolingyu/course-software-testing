@@ -1,0 +1,18 @@
+{
+  "url": "http://127.0.0.1:64687/pages/1",
+  "before_save": {
+    "title": "South",
+    "body": "South observations"
+  },
+  "save_response": {
+    "id": 1,
+    "title": "South",
+    "body": "South observations",
+    "draft": true,
+    "bookId": 1
+  },
+  "after_reload": {
+    "title": "South",
+    "body": "South observations"
+  }
+}

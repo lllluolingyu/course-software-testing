@@ -1,5 +1,6 @@
 """Browser regression tests for favorite ranking, draft identity and shelf creation."""
 
+import json
 import os
 import re
 import subprocess
@@ -86,6 +87,16 @@ class Team04Workflows(unittest.TestCase):
         self.addCleanup(context.close)
         self.page = context.new_page()
 
+    def record_observation(self, label, details):
+        """Optional review evidence; generated only inside the requested folder."""
+        directory = os.environ.get("TEAM04_EVIDENCE_DIR")
+        if not directory:
+            return
+        target = Path(directory)
+        target.mkdir(parents=True, exist_ok=True)
+        (target / f"{label}.json").write_text(json.dumps(details, indent=2) + "\n")
+        self.page.screenshot(path=str(target / f"{label}.png"), full_page=True)
+
     def test_most_viewed_favorite(self):
         page = self.page
         login(page)
@@ -109,9 +120,10 @@ class Team04Workflows(unittest.TestCase):
         entry(page, "My Favourites").click()  # Label in the course target.
         for name in names:
             expect(entry(page, name)).to_be_visible()
+        self.record_observation("favorite-ranking", {"homepage": shown, "all_favorites": names})
         self.assertIn("Atlas", shown, f"Homepage showed {shown}. All five exist in My Favourites.")
 
-    def test_history_returns_to_selected_draft(self):
+    def open_draft_history_transition(self):
         page = self.page
         login(page)
         title = control(page, "textbox", "Page title")
@@ -139,6 +151,44 @@ class Team04Workflows(unittest.TestCase):
             page.evaluate("history.go(-2)")
         loaded.value.finished()
         expect(page).to_have_url(north_url)
+        return north_url
+
+    def test_history_returns_to_selected_draft(self):
+        page = self.page
+        north_url = self.open_draft_history_transition()
+        title = control(page, "textbox", "Page title")
+        body = control(page, "textbox", "Write your page content here...")
+        self.record_observation("draft-identity", {
+            "url": north_url, "title": title.input_value(), "body": body.input_value(),
+        })
+        expect(title).to_have_value("North")
+        expect(body).to_have_value("North observations")
+
+    def test_save_after_history_preserves_selected_draft(self):
+        page = self.page
+        north_url = self.open_draft_history_transition()
+        title = control(page, "textbox", "Page title")
+        body = control(page, "textbox", "Write your page content here...")
+        # Keep running to check persistent data even when the editor identity is
+        # wrong. unittest records this subtest failure; it is never suppressed.
+        with self.subTest("editor identity before saving"):
+            expect(title).to_have_value("North")
+            expect(body).to_have_value("North observations")
+        before = {"title": title.input_value(), "body": body.input_value()}
+        north_id = north_url.rsplit("/", 1)[-1]
+        with page.expect_response(
+            lambda r: r.request.method == "PUT" and r.url.endswith(f"/api/pages/{north_id}")
+        ) as saved:
+            control(page, "button", "Save Draft").click()
+        self.assertTrue(saved.value.ok)
+        saved_payload = saved.value.json()
+        page.reload()
+        expect(page).to_have_url(north_url)
+        expect(title).to_be_visible()
+        self.record_observation("draft-persistence", {
+            "url": north_url, "before_save": before, "save_response": saved_payload,
+            "after_reload": {"title": title.input_value(), "body": body.input_value()},
+        })
         expect(title).to_have_value("North")
         expect(body).to_have_value("North observations")
 
@@ -173,6 +223,7 @@ class Team04Workflows(unittest.TestCase):
             control(page, "link", "Shelves").click()
             expect(shelf_list).to_be_visible()
         self.assertIn(seed_url, targets)
+        self.record_observation("shelf-identity", {"seed_url": seed_url, "targets_after_save": sorted(targets)})
         self.assertEqual(len(targets), 2, f"Successful save left these distinct shelf URLs: {targets}")
 
 

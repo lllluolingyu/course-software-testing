@@ -1,0 +1,40 @@
+{
+  "id": "F02",
+  "url": "http://127.0.0.1:3104/books/new",
+  "time": "2026-11-26T06:19:41.092Z",
+  "coverControls": 0,
+  "fileInputs": 0,
+  "controls": [
+    {
+      "tag": "input",
+      "type": null,
+      "label": "Name",
+      "id": "book-name"
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "label": "Description",
+      "id": "book-description"
+    },
+    {
+      "tag": "input",
+      "type": null,
+      "label": "Tags",
+      "id": "book-tags"
+    },
+    {
+      "tag": "button",
+      "type": "button",
+      "label": "Cancel",
+      "id": ""
+    },
+    {
+      "tag": "button",
+      "type": "submit",
+      "label": "Save Book",
+      "id": ""
+    }
+  ],
+  "visibleText": "Create New Book\nName\nDescription\nTags\nCancel\nSave Book"
+}

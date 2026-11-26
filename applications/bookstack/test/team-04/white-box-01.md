@@ -19,3 +19,5 @@
 | Save at North's URL after the second jump and reload | North keeps its original contents | North's ID now stores South / South observations. The book shows two drafts titled South. |
 
 The recorded IDs were 1 for North and 2 for South. IDs may differ between instances. [Navigation and save observations](assets/draft-navigation.tsv) · [Book after saving](assets/draft-after-save.png) · [Automated identity check and run command](README.md#automated-workflow-checks)
+
+The automation now includes both `test_history_returns_to_selected_draft` and `test_save_after_history_preserves_selected_draft`. The latter records an editor-identity subtest failure, continues with Save Draft, reloads, and separately asserts that North's saved title/body remain North. Thus the run reports the persistent overwrite as well as the initial display mismatch. It only modifies disposable drafts in a fresh in-memory instance. [Recorded persistence observations](assets/workflows-run-1/draft-persistence.json) · [Second run](assets/workflows-run-2/draft-persistence.json).

@@ -1,0 +1,11 @@
+{
+  "time": "2026-11-26T06:52:22.273595+00:00",
+  "command": "python test/team-04/check_workflows.py",
+  "exitCode": 1,
+  "sourceCommit": "024c2bcef427351918168a0eb414cf907822b4ac",
+  "parentSubmission": "a686a838ff3f42c4c8398ffe42efe2c02ea98414",
+  "scriptSha256": "23004e82ef95d74bbb2c664733140b17c0926d8f4163873331ad4fc271e8eada",
+  "python": "3.14.5",
+  "playwright": "1.65.2",
+  "database": "fresh app-seeded in-memory instance per test"
+}

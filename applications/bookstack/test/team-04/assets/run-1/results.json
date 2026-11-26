@@ -1,0 +1,87 @@
+{
+  "sourceCommit": "024c2bcef427351918168a0eb414cf907822b4ac",
+  "node": "v25.9.0",
+  "playwright": "1.64.1",
+  "browser": "Playwright Chromium (headless)",
+  "command": "npm test",
+  "exitCode": 1,
+  "startTime": "2026-11-26T06:14:16.276Z",
+  "durationMs": 12686.578000000001,
+  "appState": "Fresh application-seeded in-memory database; all scenario data created through the GUI",
+  "oracle": "Course requirements.yaml and supplied reference images; independent live reference system not exercised",
+  "hashes": {
+    "faults.spec.ts": "d3a2994c0592dc9c55fbe12782c311e53108c878018984585afe3e09ae0619be",
+    "helpers.ts": "e8f709dc723449c603eccbc557f4343caf8b14bfa3a58ec4f235d1af2de711a1",
+    "playwright.config.ts": "42d84195c9a3e4e32b6e1e82eed5d70e97c151391cde596849213b83dafd84e3",
+    "package-lock.json": "f88182b644c618c9e7bba3754274883d2e1a08ddcdc375479ef6f94a61301364"
+  },
+  "cases": [
+    {
+      "id": "F01",
+      "title": "F01 REQ-4.5 existing books can be associated with a shelf",
+      "status": "failed",
+      "durationMs": 1208,
+      "errors": [
+        "Error: REQ-4.5: an existing book must be assignable; the entire shelf form has no association UI\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\n  21 |   const observed = await visibleCount(association);\n  22 |   await evidence(page, info, 'F01', { book, shelf, associationControls: observed });\n> 23 |   expect(observed, 'REQ-4.5: an existing book must be assignable; the entire shelf form has no association UI').toBeGreaterThan(0);\n     |                                                                                                                 ^\n  24 | });\n  25 |\n  26 | test('F02 REQ-5.3 book creation offers optional cover configuration', async ({ page }, info) => {\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:23:113"
+      ],
+      "screenshot": "F01.png",
+      "observations": "F01.json"
+    },
+    {
+      "id": "F02",
+      "title": "F02 REQ-5.3 book creation offers optional cover configuration",
+      "status": "failed",
+      "durationMs": 438,
+      "errors": [
+        "Error: REQ-5.3: optional cover means a user may set one; no cover or upload control exists\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\n  33 |   const fileInputs = await main.locator('input[type=\"file\"]').count();\n  34 |   await evidence(page, info, 'F02', { coverControls: observed, fileInputs });\n> 35 |   expect(observed + fileInputs, 'REQ-5.3: optional cover means a user may set one; no cover or upload control exists').toBeGreaterThan(0);\n     |                                                                                                                        ^\n  36 | });\n  37 |\n  38 | test('F03 REQ-5.3 book creation offers a default page template', async ({ page }, info) => {\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:35:120"
+      ],
+      "screenshot": "F02.png",
+      "observations": "F02.json"
+    },
+    {
+      "id": "F03",
+      "title": "F03 REQ-5.3 book creation offers a default page template",
+      "status": "failed",
+      "durationMs": 489,
+      "errors": [
+        "Error: REQ-5.3: default page template selection is absent, not merely an empty template catalogue\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\n  45 |   const observed = await visibleCount(template);\n  46 |   await evidence(page, info, 'F03', { templateControls: observed });\n> 47 |   expect(observed, 'REQ-5.3: default page template selection is absent, not merely an empty template catalogue').toBeGreaterThan(0);\n     |                                                                                                                  ^\n  48 | });\n  49 |\n  50 | test('F04 REQ-3.1 authenticated dashboard includes Recent Activity', async ({ page }, info) => {\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:47:114"
+      ],
+      "screenshot": "F03.png",
+      "observations": "F03.json"
+    },
+    {
+      "id": "F04",
+      "title": "F04 REQ-3.1 authenticated dashboard includes Recent Activity",
+      "status": "failed",
+      "durationMs": 858,
+      "errors": [
+        "Error: REQ-3.1 and index_after_login.png require a Recent Activity section; all four baseline panels exist but this section does not\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\n  61 |   const observed = await visibleCount(activity);\n  62 |   await evidence(page, info, 'F04', { book, recentActivityElements: observed });\n> 63 |   expect(observed, 'REQ-3.1 and index_after_login.png require a Recent Activity section; all four baseline panels exist but this section does not').toBeGreaterThan(0);\n     |                                                                                                                                                     ^\n  64 | });\n  65 |\n  66 | test('F05 REQ-3.1 authenticated dashboard exposes its referenced controls', async ({ page }, info) => {\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:63:149"
+      ],
+      "screenshot": "F04.png",
+      "observations": "F04.json"
+    },
+    {
+      "id": "F05",
+      "title": "F05 REQ-3.1 authenticated dashboard exposes its referenced controls",
+      "status": "failed",
+      "durationMs": 623,
+      "errors": [
+        "Error: REQ-3.1 reference: Toggle Details control is missing\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\n  77 |   await evidence(page, info, 'F05', { toggleDetailsControls: counts[0], themeControls: counts[1] });\n  78 |   // One case for the omitted dashboard controls, not one bug per missing button.\n> 79 |   expect.soft(counts[0], 'REQ-3.1 reference: Toggle Details control is missing').toBeGreaterThan(0);\n     |                                                                                  ^\n  80 |   expect.soft(counts[1], 'REQ-3.1 reference: Dark Mode control is missing').toBeGreaterThan(0);\n  81 | });\n  82 |\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:79:82",
+        "Error: REQ-3.1 reference: Dark Mode control is missing\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\n  78 |   // One case for the omitted dashboard controls, not one bug per missing button.\n  79 |   expect.soft(counts[0], 'REQ-3.1 reference: Toggle Details control is missing').toBeGreaterThan(0);\n> 80 |   expect.soft(counts[1], 'REQ-3.1 reference: Dark Mode control is missing').toBeGreaterThan(0);\n     |                                                                             ^\n  81 | });\n  82 |\n  83 | test('F06 REQ-4.3 immutable bootstrap shelf rejects adding a book', async ({ page }, info) => {\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:80:77"
+      ],
+      "screenshot": "F05.png",
+      "observations": "F05.json"
+    },
+    {
+      "id": "F06",
+      "title": "F06 REQ-4.3 immutable bootstrap shelf rejects adding a book",
+      "status": "failed",
+      "durationMs": 4706,
+      "errors": [
+        "Error: REQ-4.3: the immutable bootstrap shelf must remain unchanged; Create New Book bypasses that protection\n\nexpect(locator).toHaveCount(expected) failed\n\nLocator:  getByRole('region', { name: 'Book list', exact: true }).getByRole('button', { name: 'T04-F06-BootstrapBook-00a6ca47', exact: true }).or(getByRole('region', { name: 'Book list', exact: true }).getByRole('link', { name: 'T04-F06-BootstrapBook-00a6ca47', exact: true }))\nExpected: 0\nReceived: 1\nTimeout:  4000ms\n\nCall log:\n  - REQ-4.3: the immutable bootstrap shelf must remain unchanged; Create New Book bypasses that protection getByRole('region', { name: 'Book list', exact: true }).getByRole('button', { name: 'T04-F06-BootstrapBook-00a6ca47', exact: true }).or(getByRole('region', { name: 'Book list', exact: true }).getByRole('link', { name: 'T04-F06-BootstrapBook-00a6ca47', exact: true })) with timeout 4000ms\n  - waiting for getByRole('region', { name: 'Book list', exact: true }).getByRole('button', { name: 'T04-F06-BootstrapBook-00a6ca47', exact: true }).or(getByRole('region', { name: 'Book list', exact: true }).getByRole('link', { name: 'T04-F06-BootstrapBook-00a6ca47', exact: true }))\n    12 × locator resolved to 1 element\n       - unexpected value \"1\"\n\n\n  105 |   await evidence(page, info, 'F06', { book, saveStatus: response.status(), entriesAfterReload: observed });\n  106 |   await expect(entry(region(page, 'Book list'), book),\n> 107 |     'REQ-4.3: the immutable bootstrap shelf must remain unchanged; Create New Book bypasses that protection').toHaveCount(0);\n      |                                                                                                               ^\n  108 | });\n  109 |\n    at /Users/andyluo/SynologyDrive/Junior_Fall/CS481/L7/course-software-testing/applications/bookstack/test/team-04/faults.spec.ts:107:111"
+      ],
+      "screenshot": "F06.png",
+      "observations": "F06.json"
+    }
+  ]
+}

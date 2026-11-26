@@ -1,0 +1,7 @@
+output/
+node_modules
+node_modules_*_Conflict/
+test-results/
+playwright-report/
+.venv/
+__pycache__/

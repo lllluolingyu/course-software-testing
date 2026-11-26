@@ -1,0 +1,6 @@
+{
+  "seed_url": "http://127.0.0.1:64650/shelves/1",
+  "targets_after_save": [
+    "http://127.0.0.1:64650/shelves/1"
+  ]
+}
