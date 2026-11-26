@@ -1,16 +1,30 @@
-# WB-07 · Publishing identical pages drops the second page when logged out but creates it when signed in
+# REQ-6.1 Test: Publish two identical pages in each login state (WB-07)
 
-**Method and requirement.** White-box SQL-predicate test under REQ-6.1 and REQ-2. In `createPage`, the pre-insert lookup checks `((author_id IS NULL AND ? IS NULL) OR author_id = ?)` using `draft ? user!.id : null` (`bookstack.ts:127-133`), which always binds `null` when `draft` is `false`. Yet the `INSERT` statement on line 137 binds `draft ? user!.id : user?.id ?? null`, storing `null` for anonymous publishers and `user.id` for signed-in publishers. Compare two identical published pages while logged out (`author_id IS NULL`, matching `existing` and skipping `INSERT`) against the exact same two saves while signed in (`author_id = 1`, missing `existing` and inserting a new row). [Requirements](../../requirements/requirements.yaml) · [Lookup vs insert parameter mismatch](../../backend/src/slices/bookstack.ts#L127)
+## Description
 
-**New coverage.** `REQ-6.1.spec.ts` publishes one uniquely named page while logged out and saves one draft while signed in. `WB-04` tests shelf creation against the bootstrap seed. Neither exercises `createPage`'s `author_id` mismatch between anonymous and authenticated `Save Page` submissions. [Page baseline](../baseline/REQ-6.1.spec.ts) · [Shelf seed collision](white-box-04.md)
+Two separate New Page submissions produce different page counts depending on whether the author is signed in.
 
-## Reproduce
+## Requirement: Expected Output
+
+Under REQ-6.1, each **New Page → Save Page** submission adds exactly one page to the book, including while logged out. After two successful submissions, each book should list two distinct pages. REQ-2 makes publishing available in both login states. [Course requirement](../../requirements/requirements.yaml#L654)
+
+## Test description
+
+**Playwright and browser steps.**
 
 1. Start a [fresh instance](README.md#run-manually) and stay logged out. Create book `Anonymous log`.
 2. Click **New Page**, enter title `Shift report` and body `All clear.`, and click **Save Page**. Repeat **New Page → `Shift report` / `All clear.` → Save Page** a second time on `Anonymous log`. Count the entries in **Page list** and inspect both `POST /api/books/:id/pages` responses.
 3. Click **Login**, sign in as `bookstack_user@example.com` / `Password123!`, and create book `Signed-in log`.
-4. Repeat step 2 identically twice on `Signed-in log`. Count the entries in **Page list** and compare the `POST` responses with step 2.
+4. Use two fresh **New Page** forms on `Signed-in log` and submit the same title and body once per form. Count the entries in **Page list** and compare the `POST` responses with step 2.
 
-**Expected.** REQ-2 keeps content mutations consistent while logged out, and REQ-6.1 states that **Save Page** *"publishes the entered title and body, returns to the book, and adds exactly one entry to `Page list`, including while logged out. REQ-2.2 is required only for the Save Draft branch."* Each successful **Save Page** should behave consistently across login states and add a newly created page entry.
+## Observed Output
 
-**Observed.** While logged out, both saves on `Anonymous log` returned HTTP 200 with the same page `id: 1`, silently dropping the second creation and leaving **1** `Shift report` entry in **Page list**. While signed in, the identical two saves on `Signed-in log` returned distinct IDs (`2` and `3`) and left **2** `Shift report` entries in **Page list**. [Logged-out Page list](assets/page-publish-anon.png) · [Signed-in Page list](assets/page-publish-auth.png) · [Recorded responses and counts](assets/page-publish-comparison.json) · [Automated check](README.md#automated-workflow-checks)
+All four saves returned HTTP 200. The logged-out book listed one page, with ID `1` returned twice. The signed-in book listed two pages, with IDs `2` and `3` in the recorded run. [Logged-out Page list](assets/page-publish-anon.png) · [Signed-in Page list](assets/page-publish-auth.png) · [Recorded responses and counts](assets/page-publish-comparison.json)
+
+## Test design and baseline coverage
+
+White-box test of the existing-page lookup. For a published page, the lookup uses a null author. The insert stores a null author for a logged-out visitor and the account ID for a signed-in author. Two identical submissions per fresh book exercise both paths. [Page lookup and insert](../../backend/src/slices/bookstack.ts#L127)
+
+The baseline publishes a single page and separately creates an owned draft. This case checks two deliberate submissions of identical content within each login state. [Page baseline](../baseline/REQ-6.1.spec.ts)
+
+The Playwright check is `Team04Workflows.test_anonymous_page_publish_matches_authenticated_creation`. [Setup and run command](README.md#automated-workflow-checks)

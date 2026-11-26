@@ -1,17 +1,31 @@
-# WB-05 · Saving a draft while editing a published page unpublishes it and traps its favorite state
+# REQ-8.1 Test: Remove a page favorite after saving a draft edit (WB-05)
 
-**Method and requirement.** White-box state-transition test across REQ-6.1, REQ-6.4, REQ-8.1, REQ-8.2 and REQ-9.1. Opening **Edit** on a published page mounts `PageEditRoute` → `PageEditor`, which renders **Save Draft** whenever `user` is signed in (`bookstack.tsx:653`). Clicking **Save Draft** sends `draft: true` to `PUT /api/pages/:id`, overwriting `draft = 1` in-place on the published page's row (`bookstack.ts:431-435`). Meanwhile `/api/home` and `/api/favorites` still include `draft = 1` pages in **My Most Viewed Favorites** and **My Favourites** (`bookstack.ts:206-213,476-483`), whereas `PageViewPage` short-circuits `if (page.draft)` to `PageEditor` (`bookstack.tsx:685`) before rendering the sidebar containing **Unfavorite** (`bookstack.tsx:708`). [Requirements](../../requirements/requirements.yaml) · [Reference draft notice](../../requirements/reference/page_draft.png) · [Save Draft in editor](../../frontend/src/slices/bookstack.tsx#L653) · [Draft branch in PageViewPage](../../frontend/src/slices/bookstack.tsx#L685) · [PageEditRoute entry](../../frontend/src/slices/bookstack.tsx#L796) · [In-place PUT update](../../backend/src/slices/bookstack.ts#L431) · [Home favorites query](../../backend/src/slices/bookstack.ts#L206)
+## Description
 
-**New coverage.** `REQ-6.4.spec.ts` opens **Edit** on a published page without saving a draft. `REQ-8.1.spec.ts` and `REQ-8.2.spec.ts` favorite and unfavorite a book. `REQ-9.1.spec.ts` opens a published page from **Recently Updated Pages**. None exercises **Save Draft** on an already-published, favorited page. [Editor baseline](../baseline/REQ-6.4.spec.ts) · [Favorite baseline](../baseline/REQ-8.1.spec.ts) · [Homepage favorite baseline](../baseline/REQ-8.2.spec.ts) · [Updated-pages baseline](../baseline/REQ-9.1.spec.ts)
+Saving an edit as a draft changes what opens from the favorites panel. The page stays in the panel, but its editor has no Unfavorite action.
 
-## Reproduce
+## Requirement: Expected Output
+
+Under REQ-8.1 and REQ-8.2, the saved favorite persists across navigation. Opening the sole favorite from the homepage must let its owner remove it. [Course requirement](../../requirements/requirements.yaml#L918)
+
+## Test description
+
+**Playwright and browser steps.**
 
 1. Start a [fresh instance and sign in](README.md#run-manually). Create book `Navigation manual`, click **New Page**, enter title `Beacon signals` and body `Published v1`, and click **Save Page**.
-2. Open **Beacon signals**, click **Favorite**, and confirm **Unfavorite** reports `aria-pressed="true"`. Return to `/` as a control and confirm **Beacon signals** appears in both **My Most Viewed Favorites** and **Recently Updated Pages** (and is readable at its URL while logged out).
-3. Open **Beacon signals**, click **Edit**, change body to `Draft v2`, and click **Save Draft**.
+2. Open **Beacon signals**, click **Favorite**, and confirm **Unfavorite** reports `aria-pressed="true"`. Return to `/` as a control and confirm **Beacon signals** appears in both **My Most Viewed Favorites** and **Recently Updated Pages**. In a separate logged-out window, open the page URL and verify that it shows `Published v1`.
+3. In the signed-in window, open **Beacon signals**, click **Edit**, change its body to `Draft v2`, and click **Save Draft**.
 4. Return to `/`, reload, and inspect all dashboard regions. Click **Beacon signals** inside **My Most Viewed Favorites** and look for **Unfavorite**.
 5. Open a logged-out browser context (or click **Log out**), inspect `Navigation manual`'s **Page list**, and open **Beacon signals**'s URL.
 
-**Expected.** Saving a draft edit on a published page keeps the published page readable for visitors and listed in **Recently Updated Pages** until republished (REQ-6.1, REQ-9.1, reference draft banner), and any favorited entry opened from **My Most Viewed Favorites** exposes **Unfavorite** so the preference can be removed (REQ-8.1, REQ-8.2).
+## Observed Output
 
-**Observed.** `PUT /api/pages/1` set `draft: true` on the published row itself. **Beacon signals** disappeared from **Recently Updated Pages** (`No pages have been updated yet`), vanished from the book's public **Page list**, and returned HTTP 404 (`Page not found`) when logged out. Yet while signed in, **Beacon signals** remained in **My Most Viewed Favorites** and **My Favourites**, and clicking it opened `Edit Page` with no **Unfavorite** button—trapping the favorite state unless the draft is republished or deleted. [Dashboard after Save Draft](assets/published-draft-home.png) · [Favorite opened into editor without Unfavorite](assets/published-draft-editor.png) · [Recorded before/after states](assets/published-draft-state.json) · [Automated check](README.md#automated-workflow-checks)
+The favorite reopened **Edit Page** with no **Unfavorite** action. It still appeared in **My Favourites**. The page also disappeared from **Recently Updated Pages**, and a logged-out visitor saw **Page not found** at the previously working URL. [Dashboard after Save Draft](assets/published-draft-home.png) · [Favorite opened into editor without Unfavorite](assets/published-draft-editor.png) · [Recorded before/after states](assets/published-draft-state.json)
+
+## Test design and baseline coverage
+
+White-box state-transition test. Saving a draft sets the draft flag on the existing page. Favorites still include that page, and the draft view returns the editor before rendering the favorite action. The assertion checks favorite removal. The public reading view and updated-pages list provide additional observations. [Page update](../../backend/src/slices/bookstack.ts#L431) · [Homepage favorites](../../backend/src/slices/bookstack.ts#L205) · [Draft and reading views](../../frontend/src/slices/bookstack.tsx#L685)
+
+The editor baseline reopens a published page. The favorites baselines use a book. This case follows an already-favorited page through a draft save and tries to remove the same preference. [Editor baseline](../baseline/REQ-6.4.spec.ts) · [Favorite baseline](../baseline/REQ-8.1.spec.ts) · [Homepage favorite baseline](../baseline/REQ-8.2.spec.ts)
+
+The Playwright check is `Team04Workflows.test_draft_edit_keeps_favorite_removable`. [Setup and run command](README.md#automated-workflow-checks)

@@ -175,7 +175,7 @@ class Team04Workflows(unittest.TestCase):
         self.assertIn(seed_url, targets)
         self.assertEqual(len(targets), 2, f"Successful save left these distinct shelf URLs: {targets}")
 
-    def test_draft_edit_preserves_published_page_and_unfavorite(self):
+    def test_draft_edit_keeps_favorite_removable(self):
         page = self.page
         login(page)
         create_book(page, "Navigation manual")
@@ -185,48 +185,35 @@ class Team04Workflows(unittest.TestCase):
         control(page, "button", "Save Page").click()
         entry(control(page, "region", "Page list"), "Beacon signals").click()
         expect(control(page, "heading", "Beacon signals")).to_be_visible()
-        page_path = "/" + page.url.split("/", 3)[-1]
+        published_url = page.url
 
         control(page, "button", "Favorite").click()
         expect(control(page, "button", "Unfavorite")).to_have_attribute("aria-pressed", "true")
+        page.goto("/")
+        favorites_panel = control(page, "region", "My Most Viewed Favorites")
+        favorite = entry(favorites_panel, "Beacon signals")
+        expect(entry(control(page, "region", "Recently Updated Pages"), "Beacon signals")).to_be_visible()
+        favorite.click()
+        expect(page).to_have_url(published_url)
         control(page, "button", "Edit").click()
         expect(control(page, "textbox", "Page title")).to_have_value("Beacon signals")
         if control(page, "button", "Save Draft").count() == 0:
             self.skipTest("Editor does not expose Save Draft when editing an already-published page.")
         control(page, "textbox", "Write your page content here...").fill("Draft v2")
-        with page.expect_response(lambda r: r.url.endswith(page_path) and r.request.method == "PUT") as put_resp:
+        with page.expect_response(lambda r: r.request.method in ("PUT", "POST") and "/pages" in r.url) as save:
             control(page, "button", "Save Draft").click()
-        self.assertTrue(put_resp.value.ok)
+        self.assertTrue(save.value.ok, f"Save Draft returned HTTP {save.value.status}")
 
         page.goto("/")
-        favorites_panel = control(page, "region", "My Most Viewed Favorites")
-        updated_panel = control(page, "region", "Recently Updated Pages")
+        expect(favorite).to_be_visible()
+        favorite.click()
+        unfavorite = control(page, "button", "Unfavorite")
+        expect(unfavorite, "The page opened from favorites must let the user remove it.").to_be_visible()
+        unfavorite.click()
+        expect(control(page, "button", "Favorite")).to_have_attribute("aria-pressed", "false")
+        page.goto("/")
         expect(favorites_panel).to_be_visible()
-        expect(updated_panel).to_be_visible()
-        in_updated = entry(updated_panel, "Beacon signals").count() > 0
-
-        unfavorite_available = True
-        if entry(favorites_panel, "Beacon signals").count() > 0:
-            entry(favorites_panel, "Beacon signals").click()
-            expect(
-                control(page, "heading", "Beacon signals").or_(control(page, "heading", "Edit Page"))
-            ).to_be_visible()
-            unfavorite_available = control(page, "button", "Unfavorite").count() > 0
-
-        anon_ctx = self.browser.new_context(base_url=self.base_url, viewport={"width": 1440, "height": 900})
-        self.addCleanup(anon_ctx.close)
-        anon_page = anon_ctx.new_page()
-        anon_page.goto(page_path)
-        expect(
-            control(anon_page, "heading", "Beacon signals").or_(control(anon_page, "heading", "Page not found"))
-        ).to_be_visible()
-        public_readable = control(anon_page, "heading", "Beacon signals").count() > 0
-
-        self.assertTrue(
-            public_readable and in_updated and unfavorite_available,
-            f"After Save Draft on published page: public_readable={public_readable}, "
-            f"in_recently_updated={in_updated}, unfavorite_available_from_favorites={unfavorite_available}.",
-        )
+        expect(favorite).to_have_count(0)
 
     def test_bootstrap_shelf_remains_immutable(self):
         page = self.page
@@ -250,7 +237,8 @@ class Team04Workflows(unittest.TestCase):
         if save.value.status in (400, 403, 409, 422):
             control(page, "link", "Shelves").click()
             entry(control(page, "region", "Shelf list"), "Benchmark Bootstrap Shelf").click()
-            self.assertEqual(entry(control(page, "region", "Book list"), "Intruder volume").count(), 0)
+            expect(control(page, "heading", "Benchmark Bootstrap Shelf")).to_be_visible()
+            expect(entry(control(page, "region", "Book list"), "Intruder volume")).to_have_count(0)
             return
 
         expect(control(page, "heading", "Intruder volume")).to_be_visible()
@@ -278,8 +266,6 @@ class Team04Workflows(unittest.TestCase):
                     lambda r: r.url.endswith("/pages") and r.request.method == "POST"
                 ) as resp:
                     control(page, "button", "Save Page").click()
-                if resp.value.status in (400, 409, 422):
-                    self.skipTest(f"Server declined duplicate page creation (HTTP {resp.value.status}).")
                 self.assertTrue(resp.value.ok, f"Unexpected Save Page response: HTTP {resp.value.status}")
                 ids.append(resp.value.json()["id"])
                 expect(entry(control(page, "region", "Page list"), "Shift report").first).to_be_visible()
@@ -289,12 +275,9 @@ class Team04Workflows(unittest.TestCase):
         anon_count, anon_ids = publish_twice("Anonymous log")
         login(page)
         auth_count, auth_ids = publish_twice("Signed-in log")
-        self.assertEqual(
-            (anon_count, len(set(anon_ids))),
-            (2, 2),
-            f"Logged-out Save Page produced {anon_count} entry/entries (IDs {anon_ids}), "
-            f"whereas signed-in Save Page produced {auth_count} entries (IDs {auth_ids}).",
-        )
+        for state, count, ids in [("logged out", anon_count, anon_ids), ("signed in", auth_count, auth_ids)]:
+            with self.subTest(login_state=state):
+                self.assertEqual((count, len(set(ids))), (2, 2), f"{state}: {count} entries, page IDs {ids}")
 
 
 if __name__ == "__main__":
