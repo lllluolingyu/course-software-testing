@@ -1,0 +1,41 @@
+{
+  "id": "F01",
+  "url": "http://127.0.0.1:3104/shelves/2/edit",
+  "time": "2026-11-26T06:14:18.474Z",
+  "book": "T04-F01-Book-0f79e33f",
+  "shelf": "T04-F01-Shelf-962d1222",
+  "associationControls": 0,
+  "controls": [
+    {
+      "tag": "input",
+      "type": null,
+      "label": "Name",
+      "id": "shelf-name"
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "label": "Description",
+      "id": "shelf-description"
+    },
+    {
+      "tag": "input",
+      "type": null,
+      "label": "Tags",
+      "id": "shelf-tags"
+    },
+    {
+      "tag": "button",
+      "type": "button",
+      "label": "Cancel",
+      "id": ""
+    },
+    {
+      "tag": "button",
+      "type": "submit",
+      "label": "Save Shelf",
+      "id": ""
+    }
+  ],
+  "visibleText": "Edit Shelf\nName\nDescription\nTags\nCancel\nSave Shelf"
+}

@@ -14,3 +14,5 @@
 **Expected.** Atlas, the single most-viewed favorite, appears in the homepage panel of up to four items. Any three of the remaining four can accompany it. All five should appear in the complete collection.
 
 **Observed.** The homepage showed Elm, Dune, Cedar and Birch. The complete collection showed all five, including Atlas. The favorite preference had persisted. [Homepage panel](assets/ranking-home.png) · [Complete collection](assets/ranking-all.png) · [Automated ranking check and run command](README.md#automated-workflow-checks)
+
+**Oracle boundary.** The inclusion expectation interprets the requirement's “My Most Viewed Favorites” name as ranking by visit frequency. REQ-8/8.2 explicitly specify the four-item limit and leave ties unspecified, but do not give a visit-count algorithm. The observed selection by favorite time is confirmed; the visit-frequency interpretation has not been compared against an independent live reference deployment. Keep this interpretation explicit when evaluating the case rather than treating a numeric ranking algorithm as a quoted requirement.

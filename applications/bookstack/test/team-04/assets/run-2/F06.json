@@ -1,0 +1,29 @@
+{
+  "id": "F06",
+  "url": "http://127.0.0.1:3104/shelves/1",
+  "time": "2026-11-26T06:19:46.271Z",
+  "book": "T04-F06-BootstrapBook-ee883060",
+  "saveStatus": 200,
+  "entriesAfterReload": 1,
+  "controls": [
+    {
+      "tag": "button",
+      "type": "button",
+      "label": "T04-F06-BootstrapBook-ee883060",
+      "id": ""
+    },
+    {
+      "tag": "button",
+      "type": "button",
+      "label": "New Shelf",
+      "id": ""
+    },
+    {
+      "tag": "button",
+      "type": "button",
+      "label": "Create New Book",
+      "id": ""
+    }
+  ],
+  "visibleText": "Shelves\n›\nBenchmark Bootstrap Shelf\nBenchmark Bootstrap Shelf\n\nEntry shelf for the New Shelf creation action.\n\nBook list\nT04-F06-BootstrapBook-ee883060\nActions\nNew Shelf\nCreate New Book"
+}

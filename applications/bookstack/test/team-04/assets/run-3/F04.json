@@ -1,0 +1,16 @@
+{
+  "id": "F04",
+  "url": "http://127.0.0.1:3104/",
+  "time": "2026-11-26T06:51:55.075Z",
+  "book": "T04-F04-Book-3b3367f3",
+  "recentActivityElements": 0,
+  "controls": [
+    {
+      "tag": "button",
+      "type": "button",
+      "label": "T04-F04-Book-3b3367f3",
+      "id": ""
+    }
+  ],
+  "visibleText": "My Recent Drafts\n\nYour recent drafts are empty\n\nMy Recently Viewed\nT04-F04-Book-3b3367f3\nMy Most Viewed Favorites\n\nYou have no favorites yet\n\nRecently Updated Pages\n\nNo pages have been updated yet"
+}
